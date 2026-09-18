@@ -1,0 +1,25 @@
+{
+  "name": "shiyue-related-notes",
+  "version": "1.4.1",
+  "description": "智能关联（Smart Connections 中文版）— Obsidian 语义关联插件",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck"
+  },
+  "keywords": [
+    "obsidian",
+    "obsidian-plugin",
+    "smart-connections",
+    "embeddings",
+    "semantic-search",
+    "chinese"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "obsidian": "^1.13.1",
+    "typescript": "^5.6.0"
+  }
+}

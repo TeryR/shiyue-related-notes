@@ -1,0 +1,25 @@
+# 依赖
+node_modules/
+
+# 构建产物（通过 GitHub Releases 分发）
+main.js
+release/
+
+# 运行时用户数据（含 API Key，绝不入库）
+data.json
+embeddings.json
+
+# 生成的测试库（test/generate-vault.cjs 重建）
+test/vault/
+
+# 内部交付物，不随源码发布
+交付总览.html
+
+# 发布文案草稿
+docs/公众号文章-*
+docs/推广文-*
+docs/向量化效果分析.html
+
+# 系统
+.DS_Store
+Thumbs.db
