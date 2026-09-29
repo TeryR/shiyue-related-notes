@@ -39,6 +39,9 @@ import { SCZChatModal, SCZRewriteModal, SCZNotesModal } from "./chat";
 
 export const INDEX_FILE = "embeddings.json";
 
+/** 修改事件合并窗口（毫秒）：写作停顿不超过该时长就不会触发增量索引 */
+const MODIFY_DEBOUNCE_MS = 10_000;
+
 /** 索引队列模式：auto=自动增量 / full=全量重建 / resume=手动继续（增量补齐） */
 export type IndexQueueMode = "auto" | "full" | "resume";
 
@@ -202,24 +205,23 @@ export default class SmartConnectionsZh extends Plugin {
         if (f instanceof TFile && f.extension === "md") this.enqueueFiles([f]);
       })
     );
-    // 增量：修改文件合并入队（1.5 秒窗口，给编辑器写盘留时间，连续编辑只触发一次）
+    // 增量：修改事件防抖合并——每次新修改都会重置计时，连续写作期间完全不索引；
+    // 停笔超过 MODIFY_DEBOUNCE_MS 才入队一次（写完一段话再索引，避免边写边算）。
+    // 极端连续写作数小时不停顿也不会丢：切走笔记时还有一次哈希复核兜底（registerWorkspaceEvents）。
     let pending: TFile[] = [];
     let timer: ReturnType<typeof setTimeout> | null = null;
     const flush = () => {
       const files = pending;
       pending = [];
+      timer = null;
       if (files.length > 0) this.enqueueFiles(files);
     };
     this.registerEvent(
       this.app.vault.on("modify", (f) => {
         if (!(f instanceof TFile) || f.extension !== "md") return;
         pending.push(f);
-        if (!timer) {
-          timer = setTimeout(() => {
-            timer = null;
-            flush();
-          }, 1000);
-        }
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(flush, MODIFY_DEBOUNCE_MS);
       })
     );
     this.registerEvent(
